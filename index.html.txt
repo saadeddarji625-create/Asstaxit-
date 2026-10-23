@@ -1,0 +1,172 @@
+ <!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASSTAXIT SHOP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #a855f7; --bg: #09090b; --card: #18181b; --border: #27272a; --text: #fff; --green: #4ade80; }
+        body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--primary); font-weight: 900; letter-spacing: 2px; margin-bottom: 5px; }
+        .header p { color: #a1a1aa; font-size: 12px; margin: 0; }
+        .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 15px; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); color: #fff; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; font-family: inherit;}
+        button { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: inherit; transition: 0.3s; }
+        button:hover { opacity: 0.8; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .balance { color: var(--green); font-weight: bold; font-size: 18px; }
+        .category { color: var(--primary); font-size: 14px; font-weight: bold; margin: 20px 0 10px 0; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        .product { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .p-name { font-size: 14px; font-weight: bold; }
+        .buy-btn { background: var(--border); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; width: auto; font-size: 12px; }
+        .buy-btn:hover { background: var(--primary); }
+        #adminPanel { display: none; border: 1px dashed var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ASSTAXIT☠️</h1>
+            <p>BEST PRICE • FAST DELIVERY</p>
+        </div>
+
+        <div id="loginBox" class="card">
+            <h3 style="text-align:center; margin-top:0;">تسجيل الدخول</h3>
+            <input type="text" id="u" placeholder="اسم المستخدم">
+            <input type="password" id="p" placeholder="كلمة المرور">
+            <button onclick="login()">دخول</button>
+            <p style="text-align:center; font-size:12px; color:#a1a1aa;">مثال: admin / admin</p>
+        </div>
+
+        <div id="storeBox" style="display:none;">
+            <div class="user-info card" style="padding:15px; margin-bottom: 10px;">
+                <div>أهلاً, <strong id="cUser"></strong></div>
+                <div class="balance">$<span id="cBalance">0</span></div>
+            </div>
+
+            <button onclick="toggleAdmin()" style="background:var(--card); border:1px solid var(--border); margin-bottom:15px; font-size:12px;">لوحة التحكم (للأدمن)</button>
+
+            <div id="adminPanel" class="card">
+                <h4 style="margin-top:0;">إضافة رصيد</h4>
+                <input type="text" id="targetUser" placeholder="اسم المستخدم">
+                <input type="number" id="addAmount" placeholder="المبلغ">
+                <button onclick="addBalance()" style="background:var(--green); color:#000;">شحن</button>
+            </div>
+
+            <div class="category">➡️ IOS USER</div>
+            <div id="iosList"></div>
+
+            <div class="category">➡️ ANDROID USER</div>
+            <div id="androidList"></div>
+            
+            <div class="category">💎 PREMIUM ACCESS AVAILABLE</div>
+            <div style="text-align: center; padding: 20px; background: var(--card); border-radius: 10px; border: 1px dashed var(--primary); margin-top:10px;">
+                📩 CONTACT PRIVATELY FOR ORDER <br> <strong style="color:var(--primary);">@ASSTAXIT☠️</strong>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { id: 1, platform: "IOS", name: "🔮 FLUORITE IOS", price: 20 },
+            { id: 2, platform: "IOS", name: "🎱 FLUORITE 8BALL", price: 20 },
+            { id: 3, platform: "IOS", name: "🌟 MIGUL PRO", price: 25 },
+            { id: 4, platform: "IOS", name: "🌟 MIGUL BASIC", price: 15 },
+            { id: 5, platform: "IOS", name: "📡 PROXY ALL PORT", price: 10 },
+            { id: 6, platform: "IOS", name: "✒️ CERTIFICATE", price: 5 },
+            { id: 7, platform: "IOS", name: "💠FILES VIP FILZA", price: 30 },
+            { id: 8, platform: "ANDROID", name: "✅DRIP CLIENT — ROOT / NO ROOT", price: 25 },
+            { id: 9, platform: "ANDROID", name: "✅PROXY DRIP CLIENT", price: 15 },
+            { id: 10, platform: "ANDROID", name: "👑HG CHEAT", price: 40 },
+            { id: 11, platform: "ANDROID", name: "🌟BR MODS", price: 20 },
+            { id: 12, platform: "ANDROID", name: "🛒PATO TEAM — BLUE / ORANGE", price: 35 },
+            { id: 13, platform: "ANDROID", name: "🐶TM PANEL", price: 30 }
+        ];
+
+        let db = JSON.parse(localStorage.getItem('storeDB')) || {
+            users: { "admin": { pass: "admin", balance: 1000 } }
+        };
+
+        let currentUser = "";
+
+        function saveDB() {
+            localStorage.setItem('storeDB', JSON.stringify(db));
+        }
+
+        function renderProducts() {
+            const iosList = document.getElementById('iosList');
+            const androidList = document.getElementById('androidList');
+            iosList.innerHTML = ''; androidList.innerHTML = '';
+
+            products.forEach(p => {
+                const html = `
+                    <div class="product">
+                        <div class="p-name">${p.name}</div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="color:var(--green); font-weight:bold;">$${p.price}</div>
+                            <button class="buy-btn" onclick="buy(${p.id})">شراء</button>
+                        </div>
+                    </div>
+                `;
+                if (p.platform === 'IOS') iosList.innerHTML += html;
+                else androidList.innerHTML += html;
+            });
+        }
+        renderProducts();
+
+        function login() {
+            const user = document.getElementById('u').value;
+            const pass = document.getElementById('p').value;
+            
+            if (db.users[user] && db.users[user].pass === pass) {
+                currentUser = user;
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('storeBox').style.display = 'block';
+                document.getElementById('cUser').innerText = user;
+                updateBalanceUI();
+            } else {
+                alert("بيانات خاطئة!");
+            }
+        }
+
+        function updateBalanceUI() {
+            document.getElementById('cBalance').innerText = db.users[currentUser].balance;
+        }
+
+        function buy(id) {
+            const product = products.find(p => p.id === id);
+            if (db.users[currentUser].balance >= product.price) {
+                db.users[currentUser].balance -= product.price;
+                saveDB();
+                updateBalanceUI();
+                alert(`✅ تم شراء ${product.name} بنجاح!\nتواصل مع @ASSTAXIT☠️ للاستلام.`);
+            } else {
+                alert("❌ رصيدك غير كافٍ!");
+            }
+        }
+
+        function toggleAdmin() {
+            if (currentUser !== 'admin') return alert("إنت مش أدمن!");
+            const admin = document.getElementById('adminPanel');
+            admin.style.display = admin.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function addBalance() {
+            const target = document.getElementById('targetUser').value;
+            const amount = parseFloat(document.getElementById('addAmount').value);
+
+            if (currentUser !== 'admin') return alert("إنت مش أدمن!");
+            if (!db.users[target]) return alert("المستخدم غير موجود!");
+            if (isNaN(amount)) return alert("اكتب مبلغ صحيح!");
+
+            db.users[target].balance += amount;
+            saveDB();
+            alert(`تم شحن $${amount} لـ ${target}`);
+            if (target === currentUser) updateBalanceUI();
+        }
+    </script>
+</body>
+</html>
